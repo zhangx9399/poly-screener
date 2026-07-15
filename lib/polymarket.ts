@@ -207,7 +207,7 @@ export function isDataDrivenEvent(event: PolymarketEvent): boolean {
 }
 
 // ─── Strategy 1: High certainty harvest ───────────────────
-// Data-driven events only (Finance/Tech/Economy) + 90% ≤ Yes ≤ 95% + 3-10 days + volume > $1K
+// Data-driven events only (Finance/Tech/Economy) + 90% ≤ Yes ≤ 95% + 3-15 days + volume > $1K
 
 export function filterStrategyOne(events: PolymarketEvent[]): StrategyOneItem[] {
   const results: StrategyOneItem[] = [];
@@ -224,12 +224,12 @@ export function filterStrategyOne(events: PolymarketEvent[]): StrategyOneItem[] 
       const yesPrice = getYesPrice(market);
       const days = daysUntil(market.endDate);
 
-      // Filter: 90% ≤ Yes ≤ 95% AND 3-10 days to expiry AND volume > $1000
+      // Filter: 90% ≤ Yes ≤ 95% AND 3-15 days to expiry AND volume > $1000
       if (
         yesPrice >= 0.90 &&
         yesPrice <= 0.95 &&
         days >= 3 &&
-        days <= 10 &&
+        days <= 15 &&
         market.volume > 1000
       ) {
         results.push({
