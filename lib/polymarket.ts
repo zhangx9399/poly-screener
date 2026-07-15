@@ -5,6 +5,7 @@ import {
   StrategyOneItem,
   StrategyTwoItem,
   PricePoint,
+  KellyAnalysis,
 } from "./types";
 
 const GAMMA_API = "https://gamma-api.polymarket.com";
@@ -393,4 +394,45 @@ export function getPolymarketEventUrl(slug: string): string {
 
 export function getPolymarketMarketUrl(eventSlug: string, marketSlug: string): string {
   return `https://polymarket.com/event/${eventSlug}/${marketSlug}`;
+}
+
+// ─── Kelly criterion ──────────────────────────────────────
+
+/**
+ * Calculate Kelly criterion for a Polymarket Yes bet.
+ *
+ * In Polymarket, buying a "Yes" share at price P costs P dollars.
+ * If the event occurs, the share pays out $1.00 (profit = 1-P).
+ * If not, the share is worth $0 (loss = P).
+ *
+ * Therefore:
+ *   odds  b = (1-P)/P     — profit per unit risked
+ *   p     = user's estimated true probability
+ *   q     = 1 - p
+ *   edge  = bp - q        — expected profit per $1 bet
+ *   Kelly = edge / b      — optimal fraction of bankroll to bet
+ *
+ * A positive edge means the user believes the event is MORE likely
+ * than the market price suggests. This is their cognitive advantage.
+ */
+export function calculateKelly(
+  marketPrice: number,
+  userProbability: number,
+  bankroll: number
+): KellyAnalysis {
+  const odds = (1 - marketPrice) / marketPrice;
+  const p = userProbability;
+  const q = 1 - p;
+  const edge = odds * p - q;
+  const kellyFraction = Math.max(0, Math.min(1, edge / odds));
+  const recommendedBet = kellyFraction * bankroll;
+
+  return {
+    marketPrice,
+    odds,
+    userProbability: p,
+    edge,
+    kellyFraction,
+    recommendedBet,
+  };
 }

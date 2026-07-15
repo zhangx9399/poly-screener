@@ -21,6 +21,8 @@ export default function Home() {
   const [strategyOneData, setStrategyOneData] = useState<StrategyOneItem[]>([]);
   const [strategyTwoData, setStrategyTwoData] = useState<StrategyTwoItem[]>([]);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [bankroll, setBankroll] = useState(1000);
+  const [confidenceAdjust, setConfidenceAdjust] = useState(3);
 
   const loadData = useCallback(async () => {
     try {
@@ -184,7 +186,43 @@ export default function Home() {
                 <div className="mb-3 text-xs text-gray-400">
                   筛选条件：财经/科技/经济事件 · Yes 90%-95% · 剩余 3-15 天 · 交易量 ≥ $1K
                 </div>
-                <StrategyOneTable items={strategyOneData} />
+                <div className="mb-4 flex flex-wrap items-center gap-4 rounded-lg border border-gray-100 bg-gray-50/50 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-gray-500">本金</label>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-400">$</span>
+                      <input
+                        type="number"
+                        value={bankroll}
+                        onChange={(e) => setBankroll(Math.max(0, Number(e.target.value)))}
+                        className="w-24 rounded border border-gray-200 px-2 py-1 text-sm text-gray-900 focus:border-gray-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-gray-500">信心调整</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400">+{confidenceAdjust}%</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={10}
+                        step={0.5}
+                        value={confidenceAdjust}
+                        onChange={(e) => setConfidenceAdjust(Number(e.target.value))}
+                        className="w-32 accent-indigo-600"
+                      />
+                    </div>
+                    <span className="text-xs text-gray-300">
+                      市场价 +{confidenceAdjust}% = 你的估值
+                    </span>
+                  </div>
+                </div>
+                <StrategyOneTable
+                  items={strategyOneData}
+                  bankroll={bankroll}
+                  confidenceAdjust={confidenceAdjust}
+                />
               </>
             ) : (
               <>

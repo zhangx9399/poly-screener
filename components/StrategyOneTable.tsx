@@ -1,7 +1,7 @@
 "use client";
 
 import { StrategyOneItem } from "@/lib/types";
-import { getPolymarketMarketUrl } from "@/lib/polymarket";
+import { getPolymarketMarketUrl, calculateKelly } from "@/lib/polymarket";
 
 function formatPrice(price: number): string {
   return `${(price * 100).toFixed(1)}¢`;
@@ -18,13 +18,28 @@ function formatDate(dateStr: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export default function StrategyOneTable({ items }: { items: StrategyOneItem[] }) {
+function formatPercent(frac: number): string {
+  return `${(frac * 100).toFixed(1)}%`;
+}
+
+function formatDollar(amt: number): string {
+  if (amt >= 1000) return `$${(amt / 1000).toFixed(1)}K`;
+  return `$${amt.toFixed(0)}`;
+}
+
+interface Props {
+  items: StrategyOneItem[];
+  bankroll: number;
+  confidenceAdjust: number;
+}
+
+export default function StrategyOneTable({ items, bankroll, confidenceAdjust }: Props) {
   if (items.length === 0) {
     return (
       <div className="py-20 text-center text-gray-400">
         当前没有符合条件的事件
         <div className="mt-2 text-sm">
-          筛选条件：Yes 90%-95% 且剩余 3-10 天
+          筛选条件：Yes 90%-95% 且剩余 3-15 天
         </div>
       </div>
     );
@@ -37,16 +52,23 @@ export default function StrategyOneTable({ items }: { items: StrategyOneItem[] }
           <tr className="border-b border-gray-200 text-left text-xs text-gray-500">
             <th className="pb-3 pr-4 font-medium">事件</th>
             <th className="pb-3 pr-4 font-medium text-right">Yes 概率</th>
+            <th className="pb-3 pr-4 font-medium text-right">赔率 b</th>
+            <th className="pb-3 pr-4 font-medium text-right">Edge</th>
+            <th className="pb-3 pr-4 font-medium text-right">Kelly</th>
+            <th className="pb-3 pr-4 font-medium text-right">建议下注</th>
             <th className="pb-3 pr-4 font-medium">到期日</th>
-            <th className="pb-3 pr-4 font-medium text-right">剩余天数</th>
+            <th className="pb-3 pr-4 font-medium text-right">剩余</th>
             <th className="pb-3 pr-4 font-medium text-right">交易量</th>
-            <th className="pb-3 pr-4 font-medium text-right">流动性</th>
             <th className="pb-3 font-medium"></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {items.map((item, i) => {
+          {items.map((item) => {
             const url = getPolymarketMarketUrl(item.eventSlug, item.marketSlug);
+            const userProb = Math.min(0.999, item.yesPrice + confidenceAdjust / 100);
+            const kelly = calculateKelly(item.yesPrice, userProb, bankroll);
+            const hasEdge = kelly.edge > 0;
+
             return (
               <tr key={`${item.eventId}-${item.marketId}`} className="hover:bg-gray-50">
                 <td className="py-3 pr-4">
@@ -73,6 +95,18 @@ export default function StrategyOneTable({ items }: { items: StrategyOneItem[] }
                 <td className="py-3 pr-4 text-right num font-semibold text-green-600">
                   {formatPrice(item.yesPrice)}
                 </td>
+                <td className="py-3 pr-4 text-right num text-gray-500">
+                  {kelly.odds.toFixed(3)}
+                </td>
+                <td className={`py-3 pr-4 text-right num font-medium ${hasEdge ? "text-green-600" : "text-gray-300"}`}>
+                  {kelly.edge >= 0 ? "+" : ""}{kelly.edge.toFixed(4)}
+                </td>
+                <td className={`py-3 pr-4 text-right num font-medium ${hasEdge ? "text-gray-900" : "text-gray-300"}`}>
+                  {hasEdge ? formatPercent(kelly.kellyFraction) : "—"}
+                </td>
+                <td className={`py-3 pr-4 text-right num font-semibold ${hasEdge ? "text-indigo-600" : "text-gray-300"}`}>
+                  {hasEdge ? formatDollar(kelly.recommendedBet) : "不建议"}
+                </td>
                 <td className="py-3 pr-4 num text-gray-600">
                   {formatDate(item.endDate)}
                 </td>
@@ -83,9 +117,6 @@ export default function StrategyOneTable({ items }: { items: StrategyOneItem[] }
                 </td>
                 <td className="py-3 pr-4 text-right num text-gray-600">
                   {formatVolume(item.volume)}
-                </td>
-                <td className="py-3 pr-4 text-right num text-gray-600">
-                  {formatVolume(item.liquidity)}
                 </td>
                 <td className="py-3">
                   <a

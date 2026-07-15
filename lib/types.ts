@@ -97,6 +97,16 @@ export interface PricePoint {
   p: number;   // price (0-1)
 }
 
+// Kelly criterion analysis for a single market
+export interface KellyAnalysis {
+  marketPrice: number;       // P — market price (0-1), the market's implied probability
+  odds: number;              // b = (1-P)/P — profit per unit risked
+  userProbability: number;   // p — user's estimated true probability (0-1)
+  edge: number;              // bp - q — expected profit per $1 bet
+  kellyFraction: number;     // edge / b, clamped to [0, 1] — optimal bet fraction
+  recommendedBet: number;    // kellyFraction × bankroll
+}
+
 // Parsed market (after JSON.parse of string fields)
 export interface ParsedMarket {
   id: string;
