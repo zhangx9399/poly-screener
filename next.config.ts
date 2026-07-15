@@ -1,8 +1,5 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  output: "standalone",
-  basePath: "/poly",
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
