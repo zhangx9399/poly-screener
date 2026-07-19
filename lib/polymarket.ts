@@ -124,7 +124,7 @@ const INCLUSION_TAGS = new Set([
   "Finance", "Economy", "Economics", "Tech", "Technology", "AI",
   "Crypto", "Bitcoin", "Ethereum", "Big Tech", "Equities", "Stocks",
   "Earnings", "Fed", "GDP", "CPI", "Inflation", "Macro Indicators",
-  "AI Rankings", "AI Releases", "Finance Updown", "Fed Rates",
+  "AI Releases", "Finance Updown", "Fed Rates",
   "Economic Policy", "Business", "XRP", "Ripple", "Solana",
   "CPI Release", "Core CPI", "Privates", "Anthropic", "OpenAI",
   "GPT-5", "Gemini", "google", "Elon Musk", "SpaceX", "Tesla",
@@ -138,6 +138,7 @@ const EXCLUSION_TAGS = new Set([
   "MMA", "Cricket", "Golf", "Rugby", "NASCAR", "MLS",
   "Basketball", "Baseball", "Football", "Hockey", "World Cup Awards",
   "Major League Cricket", "Europa League",
+  "AI Rankings",
 ]);
 
 const INCLUSION_KEYWORDS = [
@@ -157,6 +158,17 @@ const EXCLUSION_PATTERNS = [
   /\bbo[35]\b/i, /\bgolden boot\b/i, /\bgolden ball\b/i,
   /\brookie of the year\b/i, /\bnext team\b/i, /\bexact score\b/i,
   /\bplayer prop\b/i, /\bgoalscorer\b/i,
+  // AI model ranking/leaderboard events (subjective, not data-driven)
+  /\b最好的\s*(AI|人工智能)\s*模型\b/i,
+  /\b最强\s*(AI|人工智能)\s*模型\b/i,
+  /\bbest\s*ai\s*model\b/i,
+  /\bstrongest\s*model\b/i,
+  /\b排名.*第[一二三四五六七八九十]\s*(AI|人工智能)\s*模型\b/i,
+  /\bAI\s*model\s*rank/i,
+  // Specific model version questions (misleading/trap events)
+  /\bclaude-opus-\d/i,
+  /\bgpt-\d+.*最强\b/i,
+  /\bgpt-\d+.*best\b/i,
 ];
 
 /**
