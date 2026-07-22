@@ -184,7 +184,7 @@ export default function Home() {
             {tab === "strategy1" ? (
               <>
                 <div className="mb-3 text-xs text-gray-400">
-                  筛选条件：财经/科技/经济事件 · Yes 90%-95% · 剩余 3-15 天 · 交易量 ≥ $1K
+                  筛选条件：财经/科技/经济事件 · Yes 90%-95% · 剩余 1-5 天 · 交易量 ≥ $1K
                 </div>
                 <div className="mb-4 flex flex-wrap items-center gap-4 rounded-lg border border-gray-100 bg-gray-50/50 px-4 py-3">
                   <div className="flex items-center gap-2">
